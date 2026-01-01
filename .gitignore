@@ -1,0 +1,13 @@
+# node
+node_modules/
+dist/
+
+# env
+.env
+
+# docker
+mongo_data/
+
+# OS / editor
+.DS_Store
+.vscode/
