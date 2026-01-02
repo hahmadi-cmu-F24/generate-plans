@@ -131,6 +131,23 @@ export default function App() {
     setOrderId(null);
     setCarePlanId(null);
     setGenerator(null);
+
+    // patient inputs
+    setFirstName("");
+    setLastName("");
+    setMrn("");
+    setDob("");
+
+    // provider inputs
+    setProviderName("");
+    setNpi("");
+
+    // order inputs
+    setMedicationName("");
+    setPrimaryDiagnosis("");
+    setAdditionalDxText("");
+    setMedHistoryText("");
+    setPatientRecordsText("");
   }
 
   return (
