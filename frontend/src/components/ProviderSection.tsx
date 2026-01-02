@@ -43,7 +43,7 @@ export function ProviderSection(props: {
             Created provider ID: <span className="mono">{props.providerId}</span>
           </>
         ) : (
-          <span className="muted">Not created yet</span>
+          <span className="muted">Provider ID not created yet</span>
         )}
       </div>
     </Section>

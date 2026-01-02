@@ -50,12 +50,16 @@ export default function App() {
   };
 
   const [patientWarning, setPatientWarning] = useState<PatientWarning | null>(null);
+  
+  const [patientRecordsFile, setPatientRecordsFile] = useState<File | null>(null);
+  const [fileInputKey, setFileInputKey] = useState(0);
 
   const additionalDiagnoses = useMemo(() => parseLines(additionalDxText), [additionalDxText]);
   const medicationHistory = useMemo(() => parseLines(medHistoryText), [medHistoryText]);
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const dobValid = /^\d{4}-\d{2}-\d{2}$/.test(dob) && dob <= todayStr;
+  const recordsProvided = !!patientRecordsFile || patientRecordsText.trim().length > 0;
 
   const canSubmit =
     firstName.trim() &&
@@ -66,7 +70,7 @@ export default function App() {
     npi.trim() &&
     medicationName.trim() &&
     primaryDiagnosis.trim() &&
-    patientRecordsText.trim();
+    recordsProvided;
 
   async function handleCreateAll() {
     setError(null);
@@ -98,6 +102,7 @@ export default function App() {
         additionalDiagnoses,
         medicationHistory,
         patientRecordsText: patientRecordsText.trim(),
+        patientRecordsFile,
       });
       setOrderId(o.id);
     } catch (e: any) {
@@ -148,6 +153,8 @@ export default function App() {
     setAdditionalDxText("");
     setMedHistoryText("");
     setPatientRecordsText("");
+    setPatientRecordsFile(null);
+    setFileInputKey((k) => k + 1);
   }
 
   return (
@@ -213,12 +220,15 @@ export default function App() {
           additionalDxText={additionalDxText}
           medHistoryText={medHistoryText}
           patientRecordsText={patientRecordsText}
+          patientRecordsFile={patientRecordsFile}
+          fileInputKey={fileInputKey}
           setMedicationName={setMedicationName}
           setPrimaryDiagnosis={setPrimaryDiagnosis}
           setAdditionalDxText={setAdditionalDxText}
           setMedHistoryText={setMedHistoryText}
           setPatientRecordsText={setPatientRecordsText}
           orderId={orderId}
+          setPatientRecordsFile={setPatientRecordsFile}
         />
 
         <ActionsSection

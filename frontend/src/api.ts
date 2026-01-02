@@ -1,10 +1,14 @@
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:3001";
 
 async function http<T>(path: string, options?: RequestInit): Promise<T> {
+  const isFormData = options?.body instanceof FormData;
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json", ...(options?.headers ?? {}) },
-    ...options,
-  });
+    headers: {
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      ...(options?.headers ?? {}),
+    },
+        ...options,
+      });
 
   const text = await res.text();
   
@@ -43,7 +47,25 @@ export const api = {
     additionalDiagnoses: string[];
     medicationHistory: string[];
     patientRecordsText: string;
-  }) => http<{ id: string }>("/orders", { method: "POST", body: JSON.stringify(body) }),
+    patientRecordsFile?: File | null;
+  }) => {
+    if (body.patientRecordsFile) {
+      const fd = new FormData();
+      fd.append("patientId", body.patientId);
+      fd.append("providerId", body.providerId);
+      fd.append("medicationName", body.medicationName);
+      fd.append("primaryDiagnosis", body.primaryDiagnosis);
+      fd.append("additionalDiagnoses", body.additionalDiagnoses.join("\n"));
+      fd.append("medicationHistory", body.medicationHistory.join("\n"));
+      fd.append("patientRecordsText", body.patientRecordsText); // optional fallback
+      fd.append("patientRecordsFile", body.patientRecordsFile);
+      return http<{ id: string }>("/orders", { method: "POST", body: fd });
+    }
+
+    // JSON fallback (existing)
+    const { patientRecordsFile, ...jsonBody } = body;
+    return http<{ id: string }>("/orders", { method: "POST", body: JSON.stringify(jsonBody) });
+  },
 
   generateCarePlan: (orderId: string) =>
     http<{ id: string; orderId: string; generator: string }>(`/orders/${orderId}/care-plan`, {

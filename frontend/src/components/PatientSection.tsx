@@ -73,7 +73,7 @@ export function PatientSection(props: {
             Created patient ID: <span className="mono">{props.patientId}</span>
           </>
         ) : (
-          <span className="muted">Not created yet</span>
+          <span className="muted">Patient Id not created yet</span>
         )}
       </div>
     </Section>

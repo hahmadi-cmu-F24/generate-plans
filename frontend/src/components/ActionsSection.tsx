@@ -35,7 +35,7 @@ export function ActionsSection(props: {
         </button>
 
         <button className="btn" onClick={props.onReset} disabled={props.busy}>
-          Reset status
+          Clear Form
         </button>
       </div>
 

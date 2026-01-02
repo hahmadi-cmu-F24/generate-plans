@@ -14,6 +14,9 @@ export function OrderSection(props: {
   setMedHistoryText: (v: string) => void;
   setPatientRecordsText: (v: string) => void;
   orderId: string | null;
+  patientRecordsFile: File | null;
+  setPatientRecordsFile: (f: File | null) => void;
+  fileInputKey: number;
 }) {
   return (
     <Section title="Order">
@@ -48,7 +51,33 @@ export function OrderSection(props: {
           placeholder="Paste patient records text here..."
           rows={10}
         />
-      </div>
+
+        <div style={{ marginTop: 10 }}>
+          <label className="label">
+            <div className="labelTitle">
+              Patient Records File (optional: .txt or .pdf)
+            </div>
+
+            <input
+              key={props.fileInputKey}
+              type="file"
+              accept=".txt,.pdf,text/plain,application/pdf"
+              onChange={(e) => props.setPatientRecordsFile(e.target.files?.[0] ?? null)}
+            />
+
+          </label>
+
+          {props.patientRecordsFile ? (
+            <div className="muted" style={{ marginTop: 6 }}>
+              Selected file: <strong>{props.patientRecordsFile.name}</strong>
+            </div>
+          ) : (
+            <div className="muted" style={{ marginTop: 6 }}>
+              If a file is uploaded, it will be used instead of the text above.
+            </div>
+          )}
+        </div>
+      </div> 
 
       <div style={{ marginTop: 10, color: "#444" }}>
         {props.orderId ? (
@@ -56,7 +85,7 @@ export function OrderSection(props: {
             Created order ID: <span className="mono">{props.orderId}</span>
           </>
         ) : (
-          <span className="muted">Not created yet</span>
+          <span className="muted">Order not created yet</span>
         )}
       </div>
     </Section>

@@ -10,6 +10,8 @@ I used MongoDB because it best matched the duplicate-detection + rapid iteration
 1. LLM implementation along with user input error handling (i.e preventing letters in mrn, warning same patient with varying mrn)
 2. file input for patient records
 
+# input
+1. PDF upload is supported for text-based PDFs. Scanned/image-only PDFs require OCR and are not supported in this prototype.
 
 # output
 1. clarified by Lamar health that txt file (over csv) is fine 
