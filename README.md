@@ -1,24 +1,194 @@
-# generate-plans
-automatically generate care plans based on information (clinicals) found within the patient’s record
+# Generate Plans
 
-# teck stack
-I chose a Node/TypeScript backend because it allowed me to focus on data integrity, validation, and duplicate detection rather than framework ramp-up. In a production environment, this architecture could be implemented equivalently in Django or another backend framework.
-I used MongoDB because it best matched the duplicate-detection + rapid iteration needs and is a database I can implement correctly with strong indexes and constraints. This design would translate directly to Django/Postgres in production; the core integrity rules and API boundaries remain the same.
+Automatically generate pharmacist care plans from structured patient intake data and clinical records.
+This project focuses on data integrity, deterministic validation, and safe LLM usage in a healthcare workflow.
 
-# priority ordering
-0. user input is p0 over LLM development (initally started with webform producing mock output)
-1. LLM implementation along with user input error handling (i.e preventing letters in mrn, warning same patient with varying mrn)
-2. file input for patient records
+# Overview
 
-# input
-1. PDF upload is supported for text-based PDFs. Scanned/image-only PDFs require OCR and are not supported in this prototype.
+Specialty pharmacies spend significant time manually assembling care plans from patient records for compliance and reimbursement.
+This tool provides a structured intake workflow that validates inputs, detects duplicates, and generates a standardized pharmacist care plan using an LLM (with safe fallbacks).
 
-# output
-1. clarified by Lamar health that txt file (over csv) is fine 
+The emphasis is on correctness and reliability over UI polish.
 
-# sample input
+# Tech Stack & Rationale
+Backend
 
-Name: A.B. (Fictional) MRN: 00012345 (fictional) DOB: 1979-06-08 (Age 46) Sex: Female Weight: 72 kg Allergies: None known to medications (no IgA deficiency) Medication: IVIG Primary diagnosis: Generalized myasthenia gravis (AChR antibody positive), MGFA class IIb Secondary diagnoses: Hypertension (well controlled), GERD Home meds: Pyridostigmine 60 mg PO q6h PRN (current avg 3–4 doses/day) Prednisone 10 mg PO daily Lisinopril 10 mg PO daily Omeprazole 20 mg PO daily Recent history: Progressive proximal muscle weakness and ptosis over 2 weeks with worsening speech and swallowing fatigue. Neurology recommends IVIG for rapid symptomatic control (planned course prior to planned thymectomy). Baseline respiratory status: no stridor; baseline FVC 2.8 L (predicted 4.0 L; ~70% predicted). No current myasthenic crisis but declining strength. A. Baseline clinic note (pre-infusion) Date: 2025-10-15 Vitals: BP 128/78, HR 78, RR 16, SpO2 98% RA, Temp 36.7°C Exam: Ptosis bilateral, fatigable proximal weakness (4/5), speech slurred after repeated counting, no respiratory distress. Labs: CBC WNL; BMP: Na 138, K 4.1, Cl 101, HCO3 24, BUN 12, SCr 0.78, eGFR >90 mL/min/1.73m². IgG baseline: 10 g/L (for replacement context; note IVIG for immunomodulation here). Plan: IVIG 2 g/kg total (144 g for 72 kg) given as 0.4 g/kg/day x 5 days in outpatient infusion center. Premedicate with acetaminophen + diphenhydramine; monitor vitals and FVC daily; continue pyridostigmine and prednisone. B. Infusion visit note — Day 1 Date: 2025-10-16 IVIG product: Privigen (10% IVIG) — lot #P12345 (fictional) Dose given: 28.8 g (0.4 g/kg × 72 kg) diluted per manufacturer instructions. Premeds: Acetaminophen 650 mg PO + Diphenhydramine 25 mg PO 30 minutes pre-infusion. Infusion start rate: 0.5 mL/kg/hr for first 30 minutes (per institution titration) then increased per tolerance to max manufacturer rate. Vitals: q15 minutes first hour then q30 minutes; no fever, transient mild headache at 2 hours (resolved after slowing infusion). Respiratory: FVC 2.7 L (stable). Disposition: Completed infusion; observed 60 minutes post-infusion; discharged with plan for days 2–5. Monitoring of vitals and slow titration recommended; stop/slow if reaction. C. Follow-up — 2 weeks post-course Date: 2025-10-30 Clinical status: Subjective improvement in speech and proximal strength; fewer fatigability episodes. No thrombotic events or renal issues reported. Next neurology follow-up in 4 weeks to consider repeat course vs. thymectomy timing. 
+Node.js + TypeScript (Express)
 
-# sample output
-1.Problem list / Drug therapy problems (DTPs) - Need for rapid symptomatic control of generalized myasthenia gravis. - Monitoring for potential infusion reactions to IVIG. - Ongoing management of myasthenia gravis symptoms (fatigue, weakness). 2. Goals (SMART) - Patient will demonstrate improved muscle strength (measured by FVC) by at least 10% within 2 weeks post-IVIG treatment. - Patient will report a decrease in episodes of fatigue and improvement in speech clarity within 2 weeks. - Patient will remain free from infusion-related adverse effects during the IVIG course. 3. Pharmacist interventions / plan - Administer IVIG 2 g/kg total (144 g) as planned over 5 days, with premedication of acetaminophen and diphenhydramine. - Monitor infusion rates and adjust based on patient tolerance. - Ensure continuation of home medications (pyridostigmine, prednisone, lisinopril, omeprazole) during IVIG treatment. 4. Monitoring plan & labs - Monitor vital signs every 15 minutes for the first hour, then every 30 minutes during IVIG infusion. - Daily assessment of FVC to evaluate respiratory status. - Monitor for signs of infusion reactions (e.g., headache, fever, thrombotic events). 5. Patient education / adherence - Educate patient on the purpose and expected outcomes of IVIG therapy. - Instruct patient to report any adverse effects during infusion, such as headache or changes in breathing. - Reinforce the importance of adhering to home medications and follow-up appointments. 6. Follow-up & documentation - Schedule follow-up appointment with neurology in 4 weeks to assess response to IVIG and discuss further management options. - Document patient’s response to IVIG treatment and any adverse effects experienced during the infusion.
+Chosen to focus on data integrity, validation, and deterministic behavior without framework ramp-up.
+
+In production, this design could be implemented equivalently in Django or another backend framework.
+
+MongoDB
+
+Well-suited for document-like clinical data and rapid iteration.
+
+Strong uniqueness constraints and indexes enforce deterministic duplicate detection.
+
+Core logic would translate directly to Postgres with unique constraints and indexes.
+
+Frontend
+
+React + Vite
+
+Simple internal-tool UI focused on clarity and workflow, not branding.
+
+LLM
+
+OpenAI (configurable via env)
+
+Used to generate care plans in a fixed, compliance-friendly template.
+
+Safe fallback to a deterministic template if the LLM is unavailable.
+
+# Feature Prioritization
+
+P0 (Core)
+
+Strict input validation (MRN, NPI, DOB, ICD-10)
+
+Deterministic duplicate detection
+
+Structured care plan generation
+
+End-to-end workflow (intake → generate → download)
+
+P1
+
+File upload for patient records
+
+Duplicate patient warnings (non-blocking)
+
+UX improvements for validation feedback
+
+# Input Handling
+Patient Identity
+
+MRN: exactly 6 digits
+
+DOB: required; cannot be in the future
+
+Duplicate warning:
+
+If first name + last name + DOB match an existing patient but MRN differs, a dismissible warning is shown.
+
+The user may proceed after review.
+
+Patient Records
+
+Records can be provided in one of two ways:
+
+Paste preprocessed text
+
+Upload a file
+
+.txt (recommended)
+
+.pdf (supported only if text-based)
+
+Scanned/image-only PDFs require OCR and are intentionally not supported in this prototype.
+
+Uploaded files override pasted text.
+
+# Output
+
+A standardized pharmacist care plan with fixed sections:
+
+Drug therapy problems
+
+SMART goals
+
+Interventions
+
+Monitoring plan
+
+Patient education
+
+Follow-up & documentation
+
+Output is generated as a downloadable .txt file (confirmed acceptable by Lamar Health).
+
+# Sample Input
+
+(excerpt)
+
+Name: A.B. (Fictional)
+MRN: 00012345
+DOB: 1979-06-08
+Medication: IVIG
+Primary diagnosis: Generalized myasthenia gravis (AChR antibody positive)
+Secondary diagnoses: Hypertension, GERD
+...
+
+# Sample Output
+1. Problem list / Drug therapy problems (DTPs)
+- Need for rapid symptomatic control of generalized myasthenia gravis
+- Monitoring for infusion-related reactions
+
+2. Goals (SMART)
+- Maintain or improve respiratory function within 2 weeks post-IVIG
+...
+
+6. Follow-up & documentation
+- Neurology follow-up in 4 weeks
+- Document response and adverse effects
+
+# Setup & Running Locally
+Backend
+cd backend
+cp .env.example .env
+npm install
+npm run dev
+
+Frontend
+cd frontend
+npm install
+npm run dev
+
+
+MongoDB runs via Docker:
+
+docker compose up -d
+
+# Environment Variables
+MONGODB_URI=...
+PORT=3001
+
+LLM_PROVIDER=mock | openai
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-4o-mini
+
+
+Tests always run with LLM_PROVIDER=mock.
+
+# Notes & Limitations
+
+PDF support is limited to text-based PDFs (no OCR).
+
+Authentication and audit logging are out of scope for this prototype.
+
+The UI is intentionally minimal and reflects an internal clinical tool.
+
+# Why This Approach
+
+The project prioritizes:
+
+Deterministic behavior
+
+Safe failure modes
+
+Clear validation and warnings
+
+Production-oriented tradeoffs
+
+This mirrors real-world healthcare systems where correctness and auditability matter more than UI polish.
+
+# Next Steps (If Extended)
+
+OCR for scanned PDFs
+
+Role-based access
+
+Audit logs
+
+Structured reporting exports

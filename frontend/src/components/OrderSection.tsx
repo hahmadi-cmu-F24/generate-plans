@@ -55,7 +55,7 @@ export function OrderSection(props: {
         <div style={{ marginTop: 10 }}>
           <label className="label">
             <div className="labelTitle">
-              Patient Records File (optional: .txt or .pdf)
+              Patient Records File (recommended: .txt; PDF must be text-based)
             </div>
 
             <input
@@ -73,7 +73,7 @@ export function OrderSection(props: {
             </div>
           ) : (
             <div className="muted" style={{ marginTop: 6 }}>
-              If a file is uploaded, it will be used instead of the text above.
+              Uploaded files are used instead of pasted text. PDFs must contain extractable text (not scanned).
             </div>
           )}
         </div>
