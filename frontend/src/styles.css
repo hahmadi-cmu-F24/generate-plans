@@ -14,7 +14,8 @@
 .header {
   display: grid;
   gap: 6px;
-  margin-bottom: 18px;
+  max-width: 860px;
+  margin: 0 auto 18px;
 }
 
 .subtitle {
@@ -41,7 +42,11 @@
 .grid {
   display: grid;
   gap: 14px;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto; /* centers the whole stack */
 }
+
 
 .card {
   border: 1px solid #eee;
