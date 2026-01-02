@@ -7,6 +7,11 @@ async function http<T>(path: string, options?: RequestInit): Promise<T> {
   });
 
   const text = await res.text();
+  
+  if (text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")) {
+    throw { status: res.status, data: { message: "Server returned HTML. Check backend error handling.", preview: text.slice(0, 120) } };
+  }
+
   const data = text ? JSON.parse(text) : null;
 
   if (!res.ok) {

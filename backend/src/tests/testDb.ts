@@ -1,9 +1,13 @@
+// Force mock LLM for all tests
+process.env.LLM_PROVIDER = "mock";
+
 import mongoose from "mongoose";
 import { PatientModel } from "../models/Patient";
 import { ProviderModel } from "../models/Provider";
 import { OrderModel } from "../models/Order";
 
 export async function connectTestDB() {
+  
   const base = process.env.MONGODB_URI;
   if (!base) throw new Error("Missing MONGODB_URI");
 

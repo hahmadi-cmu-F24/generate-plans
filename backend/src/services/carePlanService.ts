@@ -1,6 +1,7 @@
 import { OrderModel } from "../models/Order";
 import { PatientModel } from "../models/Patient";
 import { ProviderModel } from "../models/Provider";
+import { getOpenAIClient } from "../llm/openaiClient";
 
 function template(params: {
   patientName: string;
@@ -51,17 +52,84 @@ export async function generateCarePlanText(orderId: string) {
   const order = await OrderModel.findById(orderId).lean();
   if (!order) return { kind: "not_found" as const };
 
-  const [patient, provider] = await Promise.all([
+  const [patient, providerDoc] = await Promise.all([
     PatientModel.findById(order.patientId).lean(),
     ProviderModel.findById(order.providerId).lean(),
   ]);
 
-  if (!patient || !provider) return { kind: "inconsistent" as const };
+  if (!patient || !providerDoc) return { kind: "inconsistent" as const };
+
+  const llmProvider = (process.env.LLM_PROVIDER ?? "mock").toLowerCase();
+
+  if (llmProvider === "openai") {
+    try{
+      const client = getOpenAIClient();
+      const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+
+      const system = `You are a clinical pharmacy assistant. Produce a care plan ONLY using the exact headings and order shown. Keep it concise, actionable, and do not invent patient facts.`;
+
+      const user = `Use the template below and fill it based ONLY on the provided patient record text.
+
+      TEMPLATE (must keep headings):
+      1. Problem list / Drug therapy problems (DTPs)
+      2. Goals (SMART)
+      3. Pharmacist interventions / plan
+      4. Monitoring plan & labs
+      5. Patient education / adherence
+      6. Follow-up & documentation
+
+      PATIENT CONTEXT:
+      Patient: ${patient.firstName} ${patient.lastName} (MRN: ${patient.mrn})
+      Referring Provider: ${providerDoc.name} (NPI: ${providerDoc.npi})
+      Medication: ${order.medicationName}
+      Primary Dx: ${order.primaryDiagnosis}
+      Additional Dx: ${(order.additionalDiagnoses ?? []).join(", ") || "None"}
+      Medication history: ${(order.medicationHistory ?? []).join("; ") || "None"}
+
+      PATIENT RECORDS:
+      ${order.patientRecordsText}
+      `;
+
+      const resp = await client.chat.completions.create({
+        model,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+        temperature: 0.2,
+      });
+
+      const planText = resp.choices[0]?.message?.content?.trim();
+      if (!planText) {
+        return { kind: "fail" as const };
+      }
+
+      return { kind: "ok" as const, planText, generator: "openai" as const, promptVersion: "v1" };
+    } catch(err) {
+      // Fallback to deterministic mock/template instead of failing the request
+      const planText = template({
+        patientName: `${patient.firstName} ${patient.lastName}`,
+        mrn: patient.mrn,
+        provider: `${providerDoc.name} (NPI: ${providerDoc.npi})`,
+        medicationName: order.medicationName,
+        primaryDx: order.primaryDiagnosis,
+        records: order.patientRecordsText,
+      });
+
+      return {
+        kind: "ok" as const,
+        planText,
+        generator: "mock_fallback" as const,
+        promptVersion: "v1",
+        warning: "OpenAI unavailable; used template fallback",
+      };
+    }
+  }
 
   const planText = template({
     patientName: `${patient.firstName} ${patient.lastName}`,
     mrn: patient.mrn,
-    provider: `${provider.name} (NPI: ${provider.npi})`,
+    provider: `${providerDoc.name} (NPI: ${providerDoc.npi})`,
     medicationName: order.medicationName,
     primaryDx: order.primaryDiagnosis,
     records: order.patientRecordsText,
