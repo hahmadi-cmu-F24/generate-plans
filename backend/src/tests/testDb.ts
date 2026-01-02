@@ -1,15 +1,23 @@
 import mongoose from "mongoose";
+import { PatientModel } from "../models/Patient";
+import { ProviderModel } from "../models/Provider";
+import { OrderModel } from "../models/Order";
 
 export async function connectTestDB() {
   const base = process.env.MONGODB_URI;
   if (!base) throw new Error("Missing MONGODB_URI");
 
-  // Force a dedicated test DB
-  const testUri = base.includes("?")
-    ? base.replace(/\/([^/?]+)(\?|$)/, "/careplan_test$2")
-    : base.replace(/\/([^/?]+)$/, "/careplan_test");
+  // simplest + reliable: build test URI explicitly
+  const testUri = "mongodb://localhost:27017/careplan_test";
 
   await mongoose.connect(testUri);
+
+  // ✅ Ensure all indexes exist before running tests
+  await Promise.all([
+    PatientModel.syncIndexes(),
+    ProviderModel.syncIndexes(),
+    OrderModel.syncIndexes(),
+  ]);
 }
 
 export async function clearTestDB() {

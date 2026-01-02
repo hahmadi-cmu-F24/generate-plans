@@ -1,6 +1,7 @@
 import express from "express";
 import { patientsRouter } from "./routes/patients";
 import { providersRouter } from "./routes/providers";
+import { ordersRouter } from "./routes/orders";
 
 export function createApp() {
   const app = express();
@@ -10,6 +11,7 @@ export function createApp() {
 
   app.use("/patients", patientsRouter);
   app.use("/providers", providersRouter);
+  app.use("/orders", ordersRouter);
 
   return app;
 }
