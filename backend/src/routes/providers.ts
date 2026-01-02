@@ -15,6 +15,23 @@ providersRouter.post("/", async (req, res) => {
   }
 
   try {
+    const existing = await ProviderModel.findOne({ npi: parsed.data.npi }).lean();
+    if (existing) {
+    const sameName = existing.name.trim().toLowerCase() === parsed.data.name.trim().toLowerCase();
+
+    if (!sameName) {
+        return res.status(409).json({
+        error: "Duplicate entity",
+        message: "NPI already exists with a different provider name. Please verify duplicate provider entry.",
+        });
+    }
+
+    return res.status(200).json({
+        id: existing._id.toString(),
+        name: existing.name,
+        npi: existing.npi,
+    });
+    }
     const created = await ProviderModel.create(parsed.data);
     return res.status(201).json({
       id: created._id.toString(),

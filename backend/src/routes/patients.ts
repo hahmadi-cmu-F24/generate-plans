@@ -15,6 +15,26 @@ patientsRouter.post("/", async (req, res) => {
   }
 
   try {
+    // If patient exists, reuse (idempotent) unless it conflicts
+    const existing = await PatientModel.findOne({ mrn: parsed.data.mrn }).lean();
+    if (existing) {
+    const sameFirst = existing.firstName.trim().toLowerCase() === parsed.data.firstName.trim().toLowerCase();
+    const sameLast = existing.lastName.trim().toLowerCase() === parsed.data.lastName.trim().toLowerCase();
+
+    if (!sameFirst || !sameLast) {
+        return res.status(409).json({
+        error: "Duplicate entity",
+        message: "MRN already exists with a different patient name. Please verify duplicate patient.",
+        });
+    }
+
+    return res.status(200).json({
+        id: existing._id.toString(),
+        firstName: existing.firstName,
+        lastName: existing.lastName,
+        mrn: existing.mrn,
+    });
+    }
     const created = await PatientModel.create(parsed.data);
     return res.status(201).json({
       id: created._id.toString(),
