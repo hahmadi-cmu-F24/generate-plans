@@ -42,6 +42,14 @@ export default function App() {
   const [carePlanId, setCarePlanId] = useState<string | null>(null);
   const [generator, setGenerator] = useState<string | null>(null);
   const [dob, setDob] = useState("");
+  type PatientWarning = {
+    code: string;
+    message: string;
+    existingPatientId?: string;
+    existingMrn?: string;
+  };
+
+  const [patientWarning, setPatientWarning] = useState<PatientWarning | null>(null);
 
   const additionalDiagnoses = useMemo(() => parseLines(additionalDxText), [additionalDxText]);
   const medicationHistory = useMemo(() => parseLines(medHistoryText), [medHistoryText]);
@@ -63,6 +71,7 @@ export default function App() {
   async function handleCreateAll() {
     setError(null);
     setBusy(true);
+    setPatientWarning(null); 
     setCarePlanId(null);
     setGenerator(null);
     setOrderId(null);
@@ -72,6 +81,8 @@ export default function App() {
     try {
       const p = await api.createPatient({ firstName, lastName, mrn, dob });
       setPatientId(p.id);
+      
+      if (p.warning) setPatientWarning(p.warning);
 
       const pr = await api.createProvider({
         name: providerName.trim(),
@@ -114,6 +125,7 @@ export default function App() {
   function resetStatus() {
     setError(null);
     setBusy(false);
+    setPatientWarning(null);
     setPatientId(null);
     setProviderId(null);
     setOrderId(null);
@@ -136,6 +148,26 @@ export default function App() {
       </header>
 
       <ErrorBox title="Request error" error={error} />
+
+      {patientWarning ? (
+        <div className="warnBox" role="alert">
+          <div className="warnTop">
+            <div className="warnTitle">Potential duplicate patient</div>
+            <button className="warnClose" onClick={() => setPatientWarning(null)} aria-label="Dismiss warning">
+              ×
+            </button>
+          </div>
+          <div className="warnBody">
+            {patientWarning.message}
+            {patientWarning.existingMrn ? (
+              <>
+                {" "}
+                Existing MRN: <span className="mono">{patientWarning.existingMrn}</span>.
+              </>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid">
         <PatientSection

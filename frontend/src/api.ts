@@ -22,11 +22,15 @@ async function http<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   createPatient: (body: { firstName: string; lastName: string; mrn: string; dob: string }) =>
-    http<{ id: string; warning?: { code: string; message: string; existingPatientId?: string; existingMrn?: string } }>(
-    "/patients",
-    { method: "POST", body: JSON.stringify(body) }
-  ),
-
+    http<{
+      id: string;
+      warning?: {
+        code: string;
+        message: string;
+        existingPatientId?: string;
+        existingMrn?: string;
+      };
+    }>("/patients", { method: "POST", body: JSON.stringify(body) }),
 
   createProvider: (body: { name: string; npi: string }) =>
     http<{ id: string }>("/providers", { method: "POST", body: JSON.stringify(body) }),
