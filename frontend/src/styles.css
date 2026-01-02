@@ -1,0 +1,153 @@
+:root {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial,
+    "Noto Sans", "Liberation Sans", sans-serif;
+  color: #111;
+  background: #fafafa;
+}
+
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 28px 18px 60px;
+}
+
+.header {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.subtitle {
+  color: #555;
+  line-height: 1.35;
+}
+
+.badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+  background: #fff;
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+
+.card {
+  border: 1px solid #eee;
+  border-radius: 16px;
+  padding: 16px;
+  background: #fff;
+}
+
+.cardTitle {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.row3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.row2Wide {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+}
+
+.label {
+  display: grid;
+  gap: 6px;
+}
+
+.labelTitle {
+  font-weight: 600;
+}
+
+.req {
+  color: crimson;
+}
+
+.input,
+.textarea {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  background: #fff;
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.muted {
+  color: #777;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btnPrimary {
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+}
+
+.errorBox {
+  border: 1px solid #f2c2c2;
+  background: #fff5f5;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+
+.errorTitle {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.footer {
+  color: #666;
+  font-size: 13px;
+  margin-top: 6px;
+}
