@@ -8,6 +8,9 @@ export function Field({
   helpText,
   inputMode,
   maxLength,
+  type,
+  maxDate
+  
 }: {
   label: string;
   value: string;
@@ -18,6 +21,8 @@ export function Field({
   helpText?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
   maxLength?: number;
+  type?: React.HTMLInputTypeAttribute;
+  maxDate?: string;
 }) {
   return (
     <label className="label">
@@ -32,6 +37,8 @@ export function Field({
         onChange={(e) => onChange(e.target.value)}
         inputMode={inputMode}
         maxLength={maxLength}
+        type={type}
+        max={maxDate}
       />
 
       {isInvalid && helpText ? <div className="helpText">{helpText}</div> : null}

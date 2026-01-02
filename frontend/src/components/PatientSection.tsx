@@ -5,14 +5,21 @@ export function PatientSection(props: {
   firstName: string;
   lastName: string;
   mrn: string;
+  dob: string;
   setFirstName: (v: string) => void;
   setLastName: (v: string) => void;
   setMrn: (v: string) => void;
+  setDob: (v: string) => void;
   patientId: string | null;
 }) {
+
   const mrnTrim = props.mrn.trim();
   const mrnTouched = mrnTrim.length > 0;
   const mrnValid = /^\d{6}$/.test(mrnTrim);
+
+  const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const dobTouched = props.dob.trim().length > 0;
+  const dobValid = !dobTouched || props.dob <= todayStr; // string compare works for YYYY-MM-DD
 
   return (
     <Section title="Patient">
@@ -43,6 +50,21 @@ export function PatientSection(props: {
             helpText="MRN must be exactly 6 digits"
             />
 
+      </div>
+
+            <div className="row2" style={{ marginTop: 12 }}>
+        <Field
+          label="Date of Birth"
+          required
+          value={props.dob}
+          onChange={props.setDob}
+          placeholder="YYYY-MM-DD"
+          inputMode="numeric"
+          isInvalid={dobTouched && !dobValid}
+          helpText="DOB cannot be after today"
+          type="date"
+          maxDate={todayStr}
+        />
       </div>
 
       <div style={{ marginTop: 10, color: "#444" }}>

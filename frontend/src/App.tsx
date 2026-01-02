@@ -41,14 +41,19 @@ export default function App() {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [carePlanId, setCarePlanId] = useState<string | null>(null);
   const [generator, setGenerator] = useState<string | null>(null);
+  const [dob, setDob] = useState("");
 
   const additionalDiagnoses = useMemo(() => parseLines(additionalDxText), [additionalDxText]);
   const medicationHistory = useMemo(() => parseLines(medHistoryText), [medHistoryText]);
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const dobValid = /^\d{4}-\d{2}-\d{2}$/.test(dob) && dob <= todayStr;
 
   const canSubmit =
     firstName.trim() &&
     lastName.trim() &&
     mrn.trim() &&
+    dobValid &&
     providerName.trim() &&
     npi.trim() &&
     medicationName.trim() &&
@@ -65,11 +70,7 @@ export default function App() {
     setProviderId(null);
 
     try {
-      const p = await api.createPatient({
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        mrn: mrn.trim(),
-      });
+      const p = await api.createPatient({ firstName, lastName, mrn, dob });
       setPatientId(p.id);
 
       const pr = await api.createProvider({
@@ -141,9 +142,11 @@ export default function App() {
           firstName={firstName}
           lastName={lastName}
           mrn={mrn}
+          dob={dob}
           setFirstName={setFirstName}
           setLastName={setLastName}
           setMrn={setMrn}
+          setDob={setDob}
           patientId={patientId}
         />
 
