@@ -14,25 +14,29 @@ providersRouter.post("/", async (req, res) => {
     });
   }
 
+  const name = parsed.data.name.trim();
+  const npi = parsed.data.npi.trim();
+  const nameKey = name.toLowerCase(); // ✅ normalized identity key
+
   try {
-    const existing = await ProviderModel.findOne({ npi: parsed.data.npi }).lean();
-    if (existing) {
-    const sameName = existing.name.trim().toLowerCase() === parsed.data.name.trim().toLowerCase();
-
-    if (!sameName) {
+    // Enforce: same provider name must keep same NPI
+    const existingByName = await ProviderModel.findOne({ nameKey }).lean();
+    if (existingByName) {
+      if (existingByName.npi !== npi) {
         return res.status(409).json({
-        error: "Duplicate entity",
-        message: "NPI already exists with a different provider name. Please verify duplicate provider entry.",
+          error: "Duplicate entity",
+          message: "Provider already exists with a different NPI. Use the existing NPI.",
         });
+      }
+      return res.status(200).json({
+        id: existingByName._id.toString(),
+        name: existingByName.name,
+        npi: existingByName.npi,
+      });
     }
 
-    return res.status(200).json({
-        id: existing._id.toString(),
-        name: existing.name,
-        npi: existing.npi,
-    });
-    }
-    const created = await ProviderModel.create(parsed.data);
+    // Create new provider
+    const created = await ProviderModel.create({ name, nameKey, npi });
     return res.status(201).json({
       id: created._id.toString(),
       name: created.name,
@@ -46,9 +50,11 @@ providersRouter.post("/", async (req, res) => {
         message: `A provider with the same ${field} already exists.`,
       });
     }
+
+    // ✅ helpful debug (optional, but useful in tests)
     return res.status(500).json({
       error: "Server error",
-      message: "Something went wrong.",
+      message: err instanceof Error ? err.message : "Something went wrong.",
     });
   }
 });

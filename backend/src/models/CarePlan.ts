@@ -2,7 +2,7 @@ import mongoose, { InferSchemaType } from "mongoose";
 
 const CarePlanSchema = new mongoose.Schema(
   {
-    orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order", required: true, unique: true },
+    orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order", required: true },
     planText: { type: String, required: true, maxlength: 200_000 },
     // optional metadata (nice for debugging, not PHI-heavy)
     generator: { type: String, required: true, default: "mock" }, // "mock" | "openai"

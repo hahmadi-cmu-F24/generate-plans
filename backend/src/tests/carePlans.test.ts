@@ -22,11 +22,16 @@ describe("Care plan generation and download", () => {
     const res = await request(app).post("/patients").send({
       firstName: "Ada",
       lastName: "Lovelace",
+      dob: "1815-12-10", // ✅ required
       mrn: "123456",
     });
+
     expect(res.status).toBe(201);
-    expect(res.body.id).toBeTruthy();
-    return res.body.id as string;
+
+    const id = res.body.id ?? res.body._id;
+    expect(id).toBeTruthy();
+
+    return id as string;
   }
 
   async function createProvider() {
@@ -34,9 +39,13 @@ describe("Care plan generation and download", () => {
       name: "Dr Example",
       npi: "1234567890",
     });
+
     expect(res.status).toBe(201);
-    expect(res.body.id).toBeTruthy();
-    return res.body.id as string;
+
+    const id = res.body.id ?? res.body._id;
+    expect(id).toBeTruthy();
+
+    return id as string;
   }
 
   async function createOrder(patientId: string, providerId: string) {
@@ -51,8 +60,11 @@ describe("Care plan generation and download", () => {
     });
 
     expect(res.status).toBe(201);
-    expect(res.body.id).toBeTruthy();
-    return res.body.id as string;
+
+    const id = res.body.id ?? res.body._id;
+    expect(id).toBeTruthy();
+
+    return id as string;
   }
 
   it("generates and downloads a care plan for an order", async () => {
@@ -67,9 +79,7 @@ describe("Care plan generation and download", () => {
     expect(gen.body.generator).toBe("mock");
 
     // Download care plan
-    const dl = await request(app).get(
-      `/orders/${orderId}/care-plan/download`
-    );
+    const dl = await request(app).get(`/orders/${orderId}/care-plan/download`);
 
     expect(dl.status).toBe(200);
     expect(dl.headers["content-type"]).toContain("text/plain");

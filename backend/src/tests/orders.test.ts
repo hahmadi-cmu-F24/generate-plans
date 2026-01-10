@@ -22,11 +22,16 @@ describe("POST /orders", () => {
     const res = await request(app).post("/patients").send({
       firstName: "Ada",
       lastName: "Lovelace",
+      dob: "1815-12-10", // ✅ required
       mrn: "123456",
     });
+
     expect(res.status).toBe(201);
-    expect(res.body.id).toBeTruthy();
-    return res.body.id as string;
+
+    const id = res.body.id ?? res.body._id;
+    expect(id).toBeTruthy();
+
+    return id as string;
   }
 
   async function createProvider() {
@@ -34,9 +39,13 @@ describe("POST /orders", () => {
       name: "Dr Example",
       npi: "1234567890",
     });
+
     expect(res.status).toBe(201);
-    expect(res.body.id).toBeTruthy();
-    return res.body.id as string;
+
+    const id = res.body.id ?? res.body._id;
+    expect(id).toBeTruthy();
+
+    return id as string;
   }
 
   it("blocks duplicate order for same patient+medication+diagnosis", async () => {

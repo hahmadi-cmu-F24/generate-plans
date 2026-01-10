@@ -3,14 +3,14 @@ import mongoose, { InferSchemaType } from "mongoose";
 const ProviderSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 120 },
-    // exactly 10 digits as a string to preserve leading zeros
+    nameKey: { type: String, required: true, trim: true }, // 👈 normalized
     npi: { type: String, required: true, trim: true },
   },
   { timestamps: true }
 );
 
-// Enforce uniqueness at the DB level
-ProviderSchema.index({ npi: 1 }, { unique: true });
+ProviderSchema.index({ npi: 1 }, { unique: true });       // one NPI per provider
+ProviderSchema.index({ nameKey: 1 }, { unique: true });   // one provider per name (your “same provider” rule)
 
 export type Provider = InferSchemaType<typeof ProviderSchema>;
 export const ProviderModel =
