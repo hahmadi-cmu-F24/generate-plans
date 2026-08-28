@@ -5,10 +5,39 @@ import { ordersRouter } from "./routes/orders";
 import { carePlansRouter } from "./routes/carePlans";
 import cors from "cors";
 
+function getAllowedOrigins(): string[] {
+  const origins = ["http://localhost:5173"];
+
+  if (process.env.FRONTEND_URL) origins.push(process.env.FRONTEND_URL);
+  if (process.env.VERCEL_URL) origins.push(`https://${process.env.VERCEL_URL}`);
+  if (process.env.VERCEL_BRANCH_URL) {
+    origins.push(`https://${process.env.VERCEL_BRANCH_URL}`);
+  }
+
+  return origins;
+}
+
 export function createApp() {
   const app = express();
   app.use(express.json());
-  app.use(cors({ origin: "http://localhost:5173" }));
+  app.use(
+    cors({
+      origin(origin, callback) {
+        // Same-origin requests and server-to-server calls omit Origin.
+        if (!origin) return callback(null, true);
+
+        const allowed = getAllowedOrigins();
+        if (allowed.includes(origin)) return callback(null, true);
+
+        // Allow Vercel preview and production URLs.
+        if (/^https:\/\/[\w.-]+\.vercel\.app$/.test(origin)) {
+          return callback(null, true);
+        }
+
+        callback(new Error("Not allowed by CORS"));
+      },
+    })
+  );
 
   app.use("/", carePlansRouter);
   app.get("/health", (_req, res) => res.json({ ok: true }));
