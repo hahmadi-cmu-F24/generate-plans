@@ -1,3 +1,14 @@
+## Live Demo
+
+**Production:** https://generate-plans.vercel.app
+
+The application is deployed on Vercel with a React/Vite frontend,
+an Express API adapted to Vercel Serverless Functions, and MongoDB Atlas
+for persistent storage.
+
+The public deployment currently uses the deterministic mock LLM provider
+so the complete workflow can be tested without external API credentials.
+
 # Generate Plans
 
 Automatically generate pharmacist care plans from structured patient intake data and clinical records.
@@ -19,9 +30,11 @@ Chosen to focus on data integrity, validation, and deterministic behavior withou
 
 In production, this design could be implemented equivalently in Django or another backend framework.
 
-MongoDB
+### MongoDB / MongoDB Atlas
 
 Well-suited for document-like clinical data and rapid iteration.
+MongoDB runs locally through Docker and uses MongoDB Atlas for the
+production deployment.
 
 Strong uniqueness constraints and indexes enforce deterministic duplicate detection.
 
@@ -40,6 +53,29 @@ OpenAI (configurable via env)
 Used to generate care plans in a fixed, compliance-friendly template.
 
 Safe fallback to a deterministic template if the LLM is unavailable.
+
+## Deployment Architecture
+
+Production is deployed on Vercel using a serverless architecture:
+
+Browser
+  ↓
+React + Vite (Vercel CDN)
+  ↓
+Express API (Vercel Serverless Function)
+  ↓
+MongoDB Atlas
+  ↓
+OpenAI (optional) / deterministic mock fallback
+
+The original Express application was adapted from a persistent Node.js
+server to a serverless entry point while preserving the existing routes
+and application behavior.
+
+Deployment is integrated with GitHub:
+- Pushes to `main` trigger production deployments
+- Pull requests receive isolated Vercel Preview Deployments
+- Secrets and configuration are managed through Vercel environment variables
 
 # Feature Prioritization
 
@@ -149,6 +185,35 @@ npm run dev
 MongoDB runs via Docker:
 
 docker compose up -d
+
+## Deployment
+
+The application is configured for Vercel deployment from the repository root.
+
+### Production Environment Variables
+
+Required:
+
+- `MONGODB_URI` — MongoDB Atlas connection string
+
+Optional:
+
+- `LLM_PROVIDER` — `mock` or `openai`
+- `OPENAI_API_KEY` — required when using the OpenAI provider
+- `OPENAI_MODEL` — model override
+
+`VITE_API_BASE` is not required in production because the frontend and API
+use the same Vercel origin.
+
+### Vercel Configuration
+
+- Root Directory: repository root
+- Frontend output: `frontend/dist`
+- API entry point: `api/index.ts`
+- Deployment configuration: `vercel.json`
+
+MongoDB runs locally through Docker during development and uses MongoDB Atlas
+in production.
 
 # Environment Variables
 MONGODB_URI=...
