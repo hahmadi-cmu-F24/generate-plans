@@ -43,8 +43,19 @@ ordersRouter.post("/", upload.single("patientRecordsFile"), async (req, res) => 
               console.log("PDF upload detected");
               console.log("PDF file size (bytes):", req.file.buffer.length);
 
-              const pdfParse = require("pdf-parse");
-              const parsedPdf = await pdfParse(req.file.buffer);
+              const { CanvasFactory } = require("pdf-parse/worker");
+              const { PDFParse } = require("pdf-parse");
+
+              const parser = new PDFParse({
+                data: req.file.buffer,
+                CanvasFactory,
+              });
+
+              const parsedPdf = await parser.getText();
+
+              patientRecordsText = (parsedPdf.text ?? "").trim();
+
+              await parser.destroy();
 
               patientRecordsText = (parsedPdf.text ?? "").trim();
 
