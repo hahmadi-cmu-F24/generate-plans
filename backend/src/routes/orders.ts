@@ -40,26 +40,28 @@ ordersRouter.post("/", upload.single("patientRecordsFile"), async (req, res) => 
         patientRecordsText = req.file.buffer.toString("utf-8");
       } else if (mimetype === "application/pdf" || original.endsWith(".pdf")) {
           try {
+              console.log("PDF upload detected");
+              console.log("PDF file size (bytes):", req.file.buffer.length);
 
-            console.log("PDF upload detected");
-            console.log("PDF file size (bytes):", req.file.buffer.length);
-            const parsedPdf = await pdfParse(req.file.buffer);
-            patientRecordsText = (parsedPdf.text ?? "").trim();
+              const pdfParse = require("pdf-parse");
+              const parsedPdf = await pdfParse(req.file.buffer);
 
-            console.log("PDF parsed successfully");
-            console.log("Extracted text length:", (parsedPdf.text ?? "").length);
+              patientRecordsText = (parsedPdf.text ?? "").trim();
 
-            if (!patientRecordsText) {
-              return res.status(400).json({
-                error: "Invalid input",
-                message: "PDF has no extractable text (may be scanned). Please upload a .txt file or paste the text.",
-              });
-            }
+              console.log("PDF parsed successfully");
+              console.log("Extracted text length:", (parsedPdf.text ?? "").length);
+
+              if (!patientRecordsText) {
+                  return res.status(400).json({
+                      error: "Invalid input",
+                      message: "PDF has no extractable text (may be scanned). Please upload a .txt file or paste the text.",
+                  });
+              }
           } catch (e) {
-            return res.status(400).json({
-              error: "Invalid input",
-              message: "Failed to parse PDF. Please upload a .txt file or paste records as text.",
-            });
+              return res.status(400).json({
+                  error: "Invalid input",
+                  message: "Failed to parse PDF. Please upload a .txt file or paste records as text.",
+              });
           }
       } else {
         return res.status(400).json({
