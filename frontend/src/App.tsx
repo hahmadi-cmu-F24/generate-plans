@@ -160,6 +160,7 @@ export default function App() {
   return (
     <div className="container">
       <header className="header">
+      (Preview Test)docker compose up -d
         <h1 style={{ margin: 0, fontSize: 26, letterSpacing: -0.2 }}>Care Plan Generator (P0 Webform)</h1>
         <div className="subtitle">
           Create a patient + provider + order, then generate and download a care plan.
